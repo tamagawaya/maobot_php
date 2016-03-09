@@ -69,15 +69,16 @@ def readConfig():
     return nicouser, nicopass, pixiuser, pixipass
 
 def main():
-    html = urlopen(sys.argv[1])
+    orig_url = sys.argv[1]
+    html = urlopen(orig_url)
     nicouser, nicopass, pixiuser, pixipass = readConfig()
     bsObj = BeautifulSoup(html)
     #print(bsObj.title.string)
     twi = re.compile('https:\/\/twitter.com\/[a-zA-Z0-9_]+\/status\/\d+')
     nic = re.compile('http:\/\/seiga.nicovideo.jp\/seiga\/[a-zA-Z0-9]+')
     pix = re.compile('http:\/\/www.pixiv.net\/member_illust.php\?mode=medium\&illust_id=[0-9]+')
-
-    if twi.match(sys.argv[1]):
+    image_format = ["jpg", "jpeg", "gif", "png"]
+    if twi.match(orig_url):
         images = bsObj.find("div", {"class": "AdaptiveMedia-container      js-adaptive-media-container          "}).findAll("div", {"class": "AdaptiveMedia-photoContainer js-adaptive-photo "})
         for item in images:
             imageLoc = item.find("img")["src"]
@@ -88,7 +89,7 @@ def main():
             type = what(loc)
             thumbnail(loc, thumb)
 
-    elif nic.match(sys.argv[1]):
+    elif nic.match(orig_url):
         opener = build_opener(HTTPCookieProcessor(CookieJar()))
         post = {
             'mail_tel': nicouser,
@@ -110,7 +111,7 @@ def main():
             thumb = "thumb_nico"+image_id+"."+type
             thumbnail(loc, thumb)
     
-    elif pix.match(sys.argv[1]):
+    elif pix.match(orig_url[1]):
         image_id = re.search('\d+', sys.argv[1]).group()
 
         api = PixivAPI()
@@ -137,8 +138,16 @@ def main():
         #with opener.open(imageLoc):
         #    urlretrieve(imageLoc, dlLoc)
         #    thumbnail(dlLoc, "thumb_pix" + image_id + imageLoc[-3:])
+
+    elif orig_url.split(".")[-1] in image_format:
+        filename = "_".join(orig_url.split("/")[-2:])
+        loc = dlDir + filename
+        thumb = "thumb_"+filename
+        urlretrieve(orig_url , loc)
+        type = what(loc)
+        thumbnail(loc, thumb)
     
-    regImg(loc, sys.argv[1], "./images/thumbnail/"+thumb, type)
+    regImg(loc, orig_url, "./images/thumbnail/"+thumb, type)
 
 if __name__ == '__main__' :
     main()
