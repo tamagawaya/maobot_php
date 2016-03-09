@@ -85,8 +85,9 @@ class Net_SmartIRC_module_IRCBot {
         $urldata = mb_convert_encoding($urldata, "UTF-8");
         preg_match( "/<title>(.*?)<\/title>/i", $urldata, $matches);
         $irc->message(SMARTIRC_TYPE_NOTICE, $data->channel,$this->encode($matches[1]));
-        print("\n\n\n" . $url . "\n\n\n");
-        exec('python3 ./imgdl.py "' . $url . '"');
+        #print("\n\n\n" . $url . "\n\n\n");
+        dlImg($url);
+        #exec('python3 ./imgdl.py "' . $url . '"');
     }
 
     public function updateCh($irc, $data) {

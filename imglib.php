@@ -1,14 +1,25 @@
 <?php
-$url = "http://www.pixiv.net/member_illust.php?mode=medium&illust_id=55669436";
-dlImg($url);
+require_once "settings.php";
+require_once "Config.php";
+
 function dlImg($url) {
+    if (!file_exists('imgdl.ini')) {
+        $conf  = array(
+            'nicoseiga.jp' => array(
+                'user' => NICOUSER,
+                'pass' => NICOPASS
+            ),
+            'pixiv.net' => array(
+                'user' => PIXIUSER,
+                'pass' => PIXIPASS
+            )
+        );
+        $config = new Config();
+        $config->parseConfig($conf, 'phparray', array('name' => 'conf'));
+        $config->writeConfig('imgdl.ini', 'inifile');
+    }
     $fullPath = 'python3 ./imgdl.py ' . $url;
     exec($fullPath, $outpara);
-    var_dump($outpara);
-    foreach($outpara as $url) {
-        echo $url."\n";
-    }
-    return $outpara;
 }
 
 ?>
