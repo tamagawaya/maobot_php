@@ -1,0 +1,7 @@
+.irc {
+    font-size: 16px;
+    line-height: 140%;
+    font-family: 'Menlo', monospace;
+    display: inline;
+    word-wrap: break-word;
+}
