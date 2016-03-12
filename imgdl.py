@@ -39,7 +39,7 @@ def thumbnail(input_file, output_file):
     thu = thu.crop((l,t,r,b))
     thu.save(thumbDir + output_file, quality=100, optimize=True)
 
-    thu = img.resize((w*300/h, 300), Image.ANTIALIAS)
+    thu = img.resize((w*300//h, 300), Image.ANTIALIAS)
     thu.save(thumb_lDir + output_file, quality=100, optimize=True)
 
 def regImg(loc,orig,thum,type):
