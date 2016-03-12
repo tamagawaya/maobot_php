@@ -86,13 +86,17 @@ function show_log($ch, $st, $et) {
     $res = selectLogs($ch, $st, $et);
     foreach ($res as $row) {
         if ($row->type == "IMGLINK") {
-            echo "    <img src={$row->content} />";
+            echo "    <img src={$row->content} /><br />";
         } else {
             $user = htmlspecialchars($row->user, ENT_QUOTES);
             $content = htmlspecialchars($row->content, ENT_QUOTES);
-            echo "   <div class='irc'>{$row->created}</div>";
-            echo "   <div class='irc'> ({$user})</div>";
-            echo "   <div class='irc'> {$content}</div><br />\n";
+            echo "   <div class='irc time'>{$row->created}</div>";
+            echo "   <div class='irc name'> ({$user})</div>";
+            if ($row->type == "PRIVMSG") {
+                echo "   <div class='irc priv'> {$content}</div><br />\n";
+            } elseif ($row->type == "NOTICE") {
+                echo "   <div class='irc noti'> {$content}</div><br />\n";
+            }
         }
     }
 }
