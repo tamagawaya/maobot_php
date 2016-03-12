@@ -18,8 +18,9 @@ function dlImg($url) {
         $config->parseConfig($conf, 'phparray', array('name' => 'conf'));
         $config->writeConfig('imgdl.ini', 'inifile');
     }
-    $fullPath = 'python3 ./imgdl.py ' . $url;
+    $fullPath = 'python3 ./imgdl.py "' . $url . '"';
     exec($fullPath, $outpara);
+    return $outpara;
 }
 
 ?>

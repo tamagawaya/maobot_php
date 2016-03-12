@@ -29,7 +29,7 @@ $starttime = date('Y-m-d\TH:i:s', time()-60*60*3);
 $endtime   = date('Y-m-d\TH:i:s');
 $channel   = "#maobot_test";
 
-if (!isset($_POST["now"])) {
+if ((!isset($_POST["now"])) && (!isset($_POST["send"]))) {
     if(isset($_POST["starttime"])) {
         $starttime = $_POST["starttime"];
     }
@@ -37,10 +37,9 @@ if (!isset($_POST["now"])) {
     if (isset($_POST["endtime"])) {
         $endtime = $_POST["endtime"];
     }
-
-    if (isset($_POST["channel"])) {
-        $channel = $_POST["channel"];
-    }
+}
+if (isset($_POST["channel"])) {
+    $channel = $_POST["channel"];
 }
 
 echo show_log($channel, $starttime, $endtime);
@@ -86,9 +85,15 @@ function disp_list($selected_value) {
 function show_log($ch, $st, $et) {
     $res = selectLogs($ch, $st, $et);
     foreach ($res as $row) {
-        echo "   <div class='irc'>{$row->created}</div>";
-        echo "   <div class='irc'> ({$row->user})</div>";
-        echo "   <div class='irc'> {$row->content}</div><br />\n";
+        if ($row->type == "IMGLINK") {
+            echo "    <img src={$row->content} />";
+        } else {
+            $user = htmlspecialchars($row->user, ENT_QUOTES);
+            $content = htmlspecialchars($row->content, ENT_QUOTES);
+            echo "   <div class='irc'>{$row->created}</div>";
+            echo "   <div class='irc'> ({$user})</div>";
+            echo "   <div class='irc'> {$content}</div><br />\n";
+        }
     }
 }
 

@@ -208,3 +208,15 @@ body:after {
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=100);
   opacity: 1;
 }
+
+.lb-dataContainer > .lb-data > .lb-details > .lb-caption > a {
+  text-decoration: none;
+  display: block;
+  margin-top: 5px;
+  color: #ccc;
+}
+
+.lb-dataContainer > .lb-data > .lb-details > .lb-caption > a:hover {
+  text-decoration: none;
+  color: #ac3cbd;
+}

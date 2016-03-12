@@ -13,11 +13,11 @@ from configparser import SafeConfigParser
 from imghdr import what
 from bs4 import  BeautifulSoup
 from PIL import Image
-from pixivpy3 import *
 import pymysql
 
 dlDir = "./images/"
 thumbDir = "./images/thumbnail/"
+thumb_lDir = "./images/thumbnail_l/"
 
 def thumbnail(input_file, output_file):
     size = 150
@@ -35,16 +35,21 @@ def thumbnail(input_file, output_file):
         t = (new_h - size) // 2
         b = new_h - t
 
-    img = img.resize((new_w, new_h), Image.ANTIALIAS)
-    img = img.crop((l,t,r,b))
-    img.save(thumbDir + output_file, quality=100, optimize=True)
+    thu = img.resize((new_w, new_h), Image.ANTIALIAS)
+    thu = thu.crop((l,t,r,b))
+    thu.save(thumbDir + output_file, quality=100, optimize=True)
+
+    thu = img.resize((w*300/h, 300), Image.ANTIALIAS)
+    thu.save(thumb_lDir + output_file, quality=100, optimize=True)
 
 def regImg(loc,orig,thum,type):
-    conn = pymysql.connect(host='',user='',
-            passwd='',db='',charset='utf8')
+    conn = pymysql.connect(host='127.0.0.1',user='maobot',
+            passwd='msc3824',db='maobot',charset='utf8')
     cur = conn.cursor()
     cur.execute("INSERT INTO images (loc,orig,thum,type) VALUES (\"%s\", \"%s\", \"%s\", \"%s\")", (loc,orig,thum,type))
     cur.connection.commit()
+    cur.close()
+    conn.close()
 
 def readConfig():
     config = SafeConfigParser()
@@ -73,21 +78,25 @@ def main():
     html = urlopen(orig_url)
     nicouser, nicopass, pixiuser, pixipass = readConfig()
     bsObj = BeautifulSoup(html)
-    #print(bsObj.title.string)
     twi = re.compile('https:\/\/twitter.com\/[a-zA-Z0-9_]+\/status\/\d+')
     nic = re.compile('http:\/\/seiga.nicovideo.jp\/seiga\/[a-zA-Z0-9]+')
     pix = re.compile('http:\/\/www.pixiv.net\/member_illust.php\?mode=medium\&illust_id=[0-9]+')
     image_format = ["jpg", "jpeg", "gif", "png"]
+    
     if twi.match(orig_url):
-        images = bsObj.find("div", {"class": "AdaptiveMedia-container      js-adaptive-media-container          "}).findAll("div", {"class": "AdaptiveMedia-photoContainer js-adaptive-photo "})
+        #print(orig_url)
+        #images = bsObj.find("div", {"class": "AdaptiveMedia-container      js-adaptive-media-container          "}).findAll("div", {"class": "AdaptiveMedia-photoContainer js-adaptive-photo "})
+        #images = bsObj.find("div", {"class": re.compile("^(AdaptiveMedia-container)\s+(js-adaptive-media-container)\s*")}).findAll("div", {"class" : re.compile("^(AdaptiveMedia-photoContainer)\s+(js-adaptive-photo)\s*")})
+        images = bsObj.find("div", {"class": "AdaptiveMedia-container"}).findAll("div", {"class": "AdaptiveMedia-photoContainer"})
         for item in images:
             imageLoc = item.find("img")["src"]
-            #print(item.find("img")["src"])
             urlretrieve(imageLoc , dlDir + "twi" + imageLoc[28:])
             loc = dlDir+"twi"+imageLoc[28:]
             thumb = "thumb_twi" + imageLoc[28:]
             type = what(loc)
             thumbnail(loc, thumb)
+            regImg(loc, orig_url, "./images/thumbnail/"+thumb, type)
+            print(thumb_lDir+thumb)
 
     elif nic.match(orig_url):
         opener = build_opener(HTTPCookieProcessor(CookieJar()))
@@ -99,7 +108,7 @@ def main():
         response = opener.open('https://secure.nicovideo.jp/secure/login', data)
         response.close()
 
-        image_id = sys.argv[1][34:]
+        image_id = orig_url[34:]
         with opener.open('http://seiga.nicovideo.jp/image/source?id=' + image_id) as response:
             bsObj = BeautifulSoup(response)
             imageLoc = bsObj.find("div", {"class": "illust_view_big"}).find("img")["src"]
@@ -109,35 +118,48 @@ def main():
             loc = dlLoc + "." + type
             os.rename(dlLoc, loc)
             thumb = "thumb_nico"+image_id+"."+type
+            print(thumb_lDir+thumb)
             thumbnail(loc, thumb)
+        regImg(loc, orig_url, "./images/thumbnail/"+thumb, type)
     
-    elif pix.match(orig_url[1]):
-        image_id = re.search('\d+', sys.argv[1]).group()
-
-        api = PixivAPI()
-        api.login(pixiuser, pixipass)
-        json_result = api.works(int(image_id))
-        imageLoc = json_result.response[0].image_urls['large']
+    elif pix.match(orig_url):
+        image_id = re.search('\d+', orig_url).group()
         opener = build_opener(HTTPCookieProcessor(CookieJar()))
         post = {
+            'mode'     : 'login',
+            'return_to': '/',
             'pixiv_id' : pixiuser,
-            'pass'     : pixipass
+            'pass'     : pixipass,
+            'skip'     : '1'
         }
         data = urlencode(post).encode("utf_8")
-        opener.addheaders = [('User-agent', 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; SV1)'),('Referer', '')]
+        opener.addheaders = [('User-agent', ':Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.4 (KHTML, like Gecko) Ubuntu/12.10 Chromium/22.0.1229.94 Chrome/22.0.1229.94 Safari/537.4'),('Referer', '')]
         response = opener.open('https://www.secure.pixiv.net/login.php', data)
         response.close()
-        opener.addheaders[1] = ('Referer', sys.argv[1])
-        loc = dlDir + "pix" + imageLoc.split("/")[-1]
-        fp = open(loc, "wb")
-        fp.write(opener.open(imageLoc).read())
-        fp.close()
-        type = what(loc)
-        thumb = "thumb_pix"+imageLoc.split("/")[-1]
-        thumbnail(loc, thumb)
-        #with opener.open(imageLoc):
-        #    urlretrieve(imageLoc, dlLoc)
-        #    thumbnail(dlLoc, "thumb_pix" + image_id + imageLoc[-3:])
+        page = opener.open(orig_url)
+        bsObj = BeautifulSoup(page)
+        img = bsObj.find("img", {"class": "original-image"})
+        a = bsObj.find("a", {"class": " _work multiple "})
+        imageLocs = []
+        if img is not None:
+            imageLocs.append(img["data-src"])
+        elif a is not None:
+            manga = BeautifulSoup(opener.open("http://www.pixiv.net/member_illust.php?mode=manga&illust_id="+image_id))
+            images = manga.findAll("img", {"data-filter": "manga-image"})
+            for img in images:
+                imageLocs.append(img["data-src"])
+
+        opener.addheaders[1] = ('Referer', orig_url)
+        for imageLoc in imageLocs:
+            loc = dlDir + "pix" + imageLoc.split("/")[-1]
+            fp = open(loc, "wb")
+            fp.write(opener.open(imageLoc).read())
+            fp.close()
+            type = what(loc)
+            thumb = "thumb_pix"+imageLoc.split("/")[-1]
+            thumbnail(loc, thumb)
+            regImg(loc, orig_url, "./images/thumbnail/"+thumb, type)
+            print(thumb_lDir+thumb)
 
     elif orig_url.split(".")[-1] in image_format:
         filename = "_".join(orig_url.split("/")[-2:])
@@ -146,8 +168,8 @@ def main():
         urlretrieve(orig_url , loc)
         type = what(loc)
         thumbnail(loc, thumb)
+        print(thumb_lDir+thumb)
+        regImg(loc, orig_url, "./images/thumbnail/"+thumb, type)
     
-    regImg(loc, orig_url, "./images/thumbnail/"+thumb, type)
-
 if __name__ == '__main__' :
     main()
