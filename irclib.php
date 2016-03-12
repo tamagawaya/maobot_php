@@ -53,7 +53,7 @@ function selectImages($startnum, $endnum) {
 
 function selectImagesCount() {
     $db = new DBRecord();
-    return $db->select('SELECt count(id) FROM images)');
+    return $db->select('SELECt count(id) FROM images');
 }
 
 function insertChannel($ch) {

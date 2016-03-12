@@ -135,6 +135,7 @@
       function addToAlbum($link) {
         self.album.push({
           link: $link.attr('href'),
+          //hyperref: $link.attr('hyperref'),
           title: $link.attr('data-title') || $link.attr('title')
         });
       }
@@ -324,6 +325,7 @@
       // Thanks Nate Wright for the fix. @https://github.com/NateWr
       if (typeof this.album[this.currentImageIndex].title !== 'undefined' && this.album[this.currentImageIndex].title !== "") {
         this.$lightbox.find('.lb-caption')
+          //.html('<a href="'+this.album[this.currentImageIndex].hyperref+'">'+this.album[this.currentImageIndex].title+'</a>')
           .html(this.album[this.currentImageIndex].title)
           .fadeIn('fast')
           .find('a').on('click', function(event){
