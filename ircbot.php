@@ -84,7 +84,7 @@ class Net_SmartIRC_module_IRCBot {
         $urldata = file_get_contents($url);
         $urldata = mb_convert_encoding($urldata, "UTF-8");
         preg_match( "/<title>(.*?)<\/title>/i", $urldata, $matches);
-        $irc->message(SMARTIRC_TYPE_NOTICE, $data->channel,$this->encode($matches[1]));
+        $irc->message(SMARTIRC_TYPE_NOTICE, $data->channel,html_entity_decode($this->encode($matches[1])));
         $log = array(
             "user" => "maobot",
             "type" => "NOTICE",
@@ -92,7 +92,6 @@ class Net_SmartIRC_module_IRCBot {
             "content" => $matches[1],
         );
         insertIRCLog($log);
-        print("\n\n\n" . $url . "\n\n\n");
         $links = dlImg($url);
         foreach ($links as $link) {
             $log = array(
