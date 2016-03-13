@@ -28,6 +28,11 @@ session_regenerate_id(true);
 $starttime = date('Y-m-d\TH:i:s', time()-60*60*3);
 $endtime   = date('Y-m-d\TH:i:s');
 $channel   = "#maobot_test";
+$nick      = "";
+
+if (isset($_POST["nick"])) {
+    $nick = $_POST["nick"];
+}
 
 if ((!isset($_POST["now"])) && (!isset($_POST["send"]))) {
     if(isset($_POST["starttime"])) {
@@ -56,7 +61,7 @@ echo disp_list($channel);
  <input type="datetime-local" id="endtime"   name="endtime"   value="<?php echo $endtime?>" />
  <input type="submit"         id="submit"    name="submit"    value="表示" />
  <input type="submit"         id="now"       name="now"       value="今"   /><br />
- <input id="nick" maxlength="50" name="nick" placeholder="名前" size="10" type="text" value="" />
+ <input id="nick" maxlength="50" name="nick" placeholder="名前" size="10" type="text" value=<?php echo $nick;?> />
  <input id="message" maxlength="1000" name="message" placeholder="発言内容" size="50" type="text" value="" />
  <input id="send" name="send" type="submit" value="送信" />
  </form>

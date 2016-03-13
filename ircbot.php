@@ -84,12 +84,13 @@ class Net_SmartIRC_module_IRCBot {
         $urldata = file_get_contents($url);
         $urldata = mb_convert_encoding($urldata, "UTF-8");
         preg_match( "/<title>(.*?)<\/title>/i", $urldata, $matches);
-        $irc->message(SMARTIRC_TYPE_NOTICE, $data->channel,html_entity_decode(str_replace("&#10;"," ",$this->encode($matches[1]))));
+        $decode_title = html_entity_decode(str_replace("&#10;", " ", $matches[1]));
+        $irc->message(SMARTIRC_TYPE_NOTICE, $data->channel, $this->encode($decode_title));
         $log = array(
             "user" => "maobot",
             "type" => "NOTICE",
             "channel" => $this->decode($data->channel),
-            "content" => $matches[1],
+            "content" => $decode_title,
         );
         insertIRCLog($log);
         $links = dlImg($url);
