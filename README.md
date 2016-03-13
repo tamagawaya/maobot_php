@@ -5,7 +5,19 @@ php5-mysqli
 
 php5-mysqlnd
 
-pear/Net/SmartIRC(https://pear.php.net/package/Net_SmartIRC)
+PIL
+
+pear/Net/SmartIRC(https://pear.php.net/package/Net_SmartIRC) 
+
+         1894   break;
+     
+         1895   }
+     
+     +++ 1896   $ircdata->channel = $params[0];
+      
+         1897   $ircdata->type = SMARTIRC_TYPE_NOTICE;
+     
+     
 
 ##Files
 DBRecord.class.php-Class for operating mysql
