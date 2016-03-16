@@ -43,10 +43,18 @@ def thumbnail(input_file, output_file):
     thu.save(thumb_lDir + output_file, quality=100, optimize=True)
 
 def regImg(loc,orig,thum,type):
-    conn = pymysql.connect(host='127.0.0.1',user='',
-            passwd='',db='',charset='utf8')
+    nick = ""
+    channel = ""
+    if len(sys.argv) == 4:
+        nick = os.fsencode(sys.argv[2]).decode('utf-8')
+        channel = os.fsencode(sys.argv[3]).decode('utf-8')
+    conn = pymysql.connect(host='127.0.0.1',user='maobot',
+            passwd='msc3824',db='maobot',charset='utf8')
     cur = conn.cursor()
-    cur.execute("INSERT INTO images (loc,orig,thum,type) VALUES (\"%s\", \"%s\", \"%s\", \"%s\")", (loc,orig,thum,type))
+    statement = "INSERT INTO images (user,channel,loc,orig,thum,type) VALUES(%s, %s, %s, %s, %s, %s)"
+    data = (nick, channel, loc, orig, thum, type)
+    cur.execute(statement, data)
+    #cur.execute("INSERT INTO images (loc,orig,thum,type) VALUES (\"%s\", \"%s\", \"%s\", \"%s\")", (loc,orig,thum,type))
     cur.connection.commit()
     cur.close()
     conn.close()
