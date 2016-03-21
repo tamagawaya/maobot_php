@@ -25,10 +25,15 @@ session_regenerate_id(true);
 #}
 
 
-$starttime = date('Y-m-d\TH:i:s', time()-60*60*3);
-$endtime   = date('Y-m-d\TH:i:s');
+$starttime = date('Y-m-d\TH:i', time()-60*60*3);
+$endtime   = date('Y-m-d\TH:i');
 $channel   = "#maobot_test";
 $nick      = "";
+$image_display = '0';
+
+if (isset($_POST["image_display"])) {
+    $image_display = $_POST["image_display"];
+}
 
 if (isset($_POST["nick"])) {
     $nick = $_POST["nick"];
@@ -43,25 +48,46 @@ if ((!isset($_POST["now"])) && (!isset($_POST["send"]))) {
         $endtime = $_POST["endtime"];
     }
 }
+
+if (isset($_POST["mae"])) {
+    $starttime = date('Y-m-d\TH:i', strtotime($starttime.'-3 hours'));
+    $endtime = date('Y-m-d\TH:i', strtotime($endtime.'-3 hours'));
+}
+
+if (isset($_POST["tugi"])) {
+    $starttime = date('Y-m-d\TH:i', strtotime($starttime.'+3 hours'));
+    $endtime = date('Y-m-d\TH:i', strtotime($endtime.'+3 hours'));
+}
+
 if (isset($_POST["channel"])) {
     $channel = $_POST["channel"];
 }
 
-echo show_log($channel, $starttime, $endtime);
+#echo show_log($channel, $starttime, date('Y-m-d\TH:i', strtotime($endtime.'+1 minute')));
+#print(strtotime($endtime.'+1 minute'));
 
 if (isset($_POST["send"]) and isset($_POST["channel"]) and isset($_POST["nick"]) and isset($_POST["message"])) {
     insertPHPLog($_POST);
 }
 
-print(' <form action="/mypage/maobot_php/irclog.php#bottom" method="POST">');
+echo show_log($channel, $starttime, date('Y-m-d\TH:i', strtotime($endtime.'+1 minute')), $image_display);
+
+#echo " <form action='/mypage/maobot_php/irclog.php#bottom' method='POST'>\n";
+echo " <form action='' method='POST'>\n";
 echo disp_list($channel);
 ?>
  
  <input type="datetime-local" id="starttime" name="starttime" value="<?php echo $starttime?>" />
  <input type="datetime-local" id="endtime"   name="endtime"   value="<?php echo $endtime?>" />
- <input type="submit"         id="submit"    name="submit"    value="表示" />
- <input type="submit"         id="now"       name="now"       value="今"   /><br />
- <input id="nick" maxlength="50" name="nick" placeholder="名前" size="10" type="text" value=<?php echo $nick;?> />
+ <input type="submit"         id="display"   name="display"   value="表示" />
+ <input type="submit"         id="mae"       name="mae"       value="＜前" />
+ <input type="submit"         id="now"       name="now"       value="今"   />
+ <input type="submit"         id="tugi"      name="tugi"      value="次＞" /><br />
+ <select name="image_display" onChange="submit()">
+  <option <?php if ($image_display == '0') echo("selected ");?> value='0'>False</option>
+  <option <?php if ($image_display == '1') echo("selected ");?> value='1'>True</option>
+ </select>
+ <input id="nick" maxlength="50" name="nick" placeholder="名前" size="10" type="text" value="<?php echo $nick;?>" />
  <input id="message" maxlength="1000" name="message" placeholder="発言内容" size="50" type="text" value="" />
  <input id="send" name="send" type="submit" value="送信" />
  </form>
@@ -76,21 +102,21 @@ echo disp_list($channel);
 
 function disp_list($selected_value) {
     $res = selectChannels();
-    echo("<select name=\"channel\">");
+    echo("  <select name=\"channel\" onChange=\"submit()\">\n");
     foreach ($res as $row) {
-        echo("<option ");
+        echo("   <option ");
         if ($selected_value == $row->name) {
             echo("selected ");
         }
-        echo(" value=\"" . $row->name . "\">" . $row->name . "</option>");
+        echo("value=\"" . $row->name . "\">" . $row->name . "</option>\n");
     }
-    echo("</select>");
+    echo("  </select>");
 }
 
-function show_log($ch, $st, $et) {
+function show_log($ch, $st, $et, $image_display) {
     $res = selectLogs($ch, $st, $et);
     foreach ($res as $row) {
-        if ($row->type == "IMGLINK") {
+        if ($row->type == "IMGLINK" && $image_display=='1') {
             echo "    <img src={$row->content} /><br />";
         } else {
             $user = htmlspecialchars($row->user, ENT_QUOTES);
