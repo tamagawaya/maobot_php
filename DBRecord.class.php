@@ -91,7 +91,6 @@ class DBRecord {
         $where_format = implode('', $where_format);
         $where_format = str_replace('%', '', $where_format);
         $format .= $where_format;
-        var_dump($format);
 
         list($fields, $placeholders, $values) = $this->prep_query($data, 'update');
 

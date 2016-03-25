@@ -48,8 +48,8 @@ def regImg(loc,orig,thum,type):
     if len(sys.argv) == 4:
         nick = os.fsencode(sys.argv[2]).decode('utf-8')
         channel = os.fsencode(sys.argv[3]).decode('utf-8')
-    conn = pymysql.connect(host='127.0.0.1',user='',
-            passwd='',db='',charset='utf8')
+    conn = pymysql.connect(host='127.0.0.1',user='maobot',
+            passwd='msc3824',db='maobot',charset='utf8')
     cur = conn.cursor()
     statement = "INSERT INTO images (user,channel,loc,orig,thum,type) VALUES(%s, %s, %s, %s, %s, %s)"
     data = (nick, channel, loc, orig, thum, type)
@@ -142,7 +142,7 @@ def main():
         }
         data = urlencode(post).encode("utf_8")
         opener.addheaders = [('User-agent', ':Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.4 (KHTML, like Gecko) Ubuntu/12.10 Chromium/22.0.1229.94 Chrome/22.0.1229.94 Safari/537.4'),('Referer', '')]
-        response = opener.open('https://www.secure.pixiv.net/login.php', data)
+        response = opener.open('http://www.pixiv.net/login.php', data)
         response.close()
         page = opener.open(orig_url)
         bsObj = BeautifulSoup(page)

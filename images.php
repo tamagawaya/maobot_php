@@ -50,7 +50,8 @@ function image_list($page, $row=10, $column=5) {
     $c = 1;
     echo "<tr>\n";
     foreach ($res as $image) {
-        echo "<td>\n<div class='text-center'><a href={$image->loc} class='example-image-link' data-title=\"<a target='_blank' href={$image->orig}>{$image->orig}</a>\" data-lightbox='example-set'><img alt='Generic placeholder thumbnail' class='img-rounded img-responsive' src={$image->thum}></img></a></div>\n</td>\n";
+        echo "<td>\n<div class='text-center'><a href={$image->loc} class='example-image-link' data-title=\"<a target='_blank' href={$image->orig}>({$image->user}) {$image->orig}</a>{$image->created} {$image->channel}\" data-lightbox='example-set'>";
+        echo "<img alt='Generic placeholder thumbnail' class='img-rounded img-responsive' src={$image->thum}></img></a></div>\n</td>\n";
         if ($r % $row == 0) {
             if ($c != $column) {
                 $c++;
