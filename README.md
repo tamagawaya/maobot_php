@@ -7,6 +7,11 @@ php5-mysqlnd
 
 pear/Net/SmartIRC(https://pear.php.net/package/Net_SmartIRC)
 
+bs4
+
+PIL
+
+
 ##Files
 DBRecord.class.php-Class for operating mysql
 
