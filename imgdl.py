@@ -89,6 +89,7 @@ def main():
     twi = re.compile('https:\/\/twitter.com\/[a-zA-Z0-9_]+\/status\/\d+')
     nic = re.compile('http:\/\/seiga.nicovideo.jp\/seiga\/[a-zA-Z0-9]+')
     pix = re.compile('http:\/\/www.pixiv.net\/member_illust.php\?mode=medium\&illust_id=[0-9]+')
+    pix_ = re.compile('http:\/\/www.pixiv.net\/member_illust.php\?mode=manga_big\&illust_id=[0-9]+\&page=[0-9]+')
     image_format = ["jpg", "jpeg", "gif", "png"]
     
     if twi.match(orig_url):
@@ -168,6 +169,34 @@ def main():
             thumbnail(loc, thumb)
             regImg(loc, orig_url, "./images/thumbnail/"+thumb, type)
             print(thumb_lDir+thumb)
+
+    elif pix_.match(orig_url):
+        image_id = re.search('\d+', orig_url).group()
+        opener = build_opener(HTTPCookieProcessor(CookieJar()))
+        post = {
+            'mode'     : 'login',
+            'return_to': '/',
+            'pixiv_id' : pixiuser,
+            'pass'     : pixipass,
+            'skip'     : '1'
+        }
+        data = urlencode(post).encode("utf_8")
+        opener.addheaders = [('User-agent', ':Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.4 (KHTML, like Gecko) Ubuntu/12.10 Chromium/22.0.1229.94 Chrome/22.0.1229.94 Safari/537.4'),('Referer', '')]
+        response = opener.open('http://www.pixiv.net/login.php', data)
+        response.close()
+        page = opener.open(orig_url)
+        bsObj = BeautifulSoup(page)
+        imageLoc = bsObj.img.get("src")
+        opener.addheaders[1] = ('Referer', orig_url)
+        loc = dlDir + "pix_" + imageLoc.split("/")[-1]
+        fp = open(loc, "wb")
+        fp.write(opener.open(imageLoc).read())
+        fp.close()
+        type = what(loc)
+        thumb = "thumb_pix_"+imageLoc.split("/")[-1]
+        thumbnail(loc, thumb)
+        regImg(loc, orig_url, "./images/thumbnail/"+thumb, type)
+        print(thumb_lDir+thumb)
 
     elif orig_url.split(".")[-1] in image_format:
         filename = "_".join(orig_url.split("/")[-2:])
