@@ -81,24 +81,31 @@ class Net_SmartIRC_module_IRCBot {
     public function getUrl($irc, $data) {
         preg_match_all('/https?:\/\/[a-zA-Z0-9\-\.\/\?\@_&=:~#]+/', $data->message, $match);
         $url = $match[0][0];
+        $nick = $this->decode($data->nick);
+        $channel = $this->decode($data->channel);
+        $this->insertUrl($irc, $url, $nick, $channel);
+    }
+
+    public function insertUrl($irc, $url, $nick, $channel) {
         $urldata = file_get_contents($url);
         $urldata = mb_convert_encoding($urldata, "UTF-8");
         preg_match( "/<title>(.*?)<\/title>/i", $urldata, $matches);
         $decode_title = html_entity_decode(str_replace("&#10;"," ",$matches[1]));
-        $irc->message(SMARTIRC_TYPE_NOTICE, $data->channel, $this->encode($decode_title));
+        var_dump($this->encode($channel)+" "+$this->encode($decode_title));
+        $irc->message(SMARTIRC_TYPE_NOTICE, $this->encode($channel), $this->encode($decode_title));
         $log = array(
             "user" => "maobot",
             "type" => "NOTICE",
-            "channel" => $this->decode($data->channel),
+            "channel" => $channel,
             "content" => $decode_title,
         );
         insertIRCLog($log);
-        $links = dlImg($this->decode($data->nick), $this->decode($data->channel), $url);
+        $links = dlImg($nick, $channel, $url);
         foreach ($links as $link) {
             $log = array(
-                "user"    => $this->decode($data->nick),
+                "user"    => $nick,
                 "type"    => "IMGLINK",
-                "channel" => $this->decode($data->channel),
+                "channel" => $channel,
                 "content" => $link,
             );
             insertIRCLog($log);
@@ -121,6 +128,10 @@ class Net_SmartIRC_module_IRCBot {
                 $content = $this->encode($row->content);
                 $id      = $row->id;
                 $irc->message(SMARTIRC_TYPE_CHANNEL, $channel, '('.$nick.') '.$content);
+                preg_match_all('/https?:\/\/[a-zA-Z0-9\-\.\/\?\@&=:~_#]+/', $row->content, $match);
+                if (isset($match[0][0])) {
+                    $this->insertUrl($irc, $match[0][0], $row->user, $row->channel);
+                }
                 updateUnsaid2Said($id);
             }
         }
