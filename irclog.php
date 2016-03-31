@@ -18,6 +18,7 @@ include_once "irclib.php";
 
 session_start();
 session_regenerate_id(true);
+
 //login check
 #if(!isset($_SESSION["USERID"])) {
 #    header("Location: logout.php");
@@ -27,9 +28,14 @@ session_regenerate_id(true);
 
 $starttime = date('Y-m-d\TH:i', time()-60*60*3);
 $endtime   = date('Y-m-d\TH:i');
-$channel   = "#maobot_test";
-$nick      = "";
+$channel   = "#化学部";
 $image_display = '0';
+
+if (isset($_COOKIE['nick'])) {
+    $nick = $_COOKIE['nick'];
+} else {
+    $nick = "";
+}
 
 if (isset($_POST["image_display"])) {
     $image_display = $_POST["image_display"];
@@ -37,6 +43,7 @@ if (isset($_POST["image_display"])) {
 
 if (isset($_POST["nick"])) {
     $nick = $_POST["nick"];
+    setcookie('nick', $nick, time() + 60*60*24*14);
 }
 
 if ((!isset($_POST["now"])) && (!isset($_POST["send"]))) {
@@ -73,7 +80,7 @@ if (isset($_POST["send"]) and isset($_POST["channel"]) and isset($_POST["nick"])
 echo show_log($channel, $starttime, date('Y-m-d\TH:i', strtotime($endtime.'+1 minute')), $image_display);
 
 #echo " <form action='/mypage/maobot_php/irclog.php#bottom' method='POST'>\n";
-echo " <form action='' method='POST'>\n";
+echo " <form action='irclog.php#bottom' method='POST'>\n";
 echo disp_list($channel);
 ?>
  
@@ -122,7 +129,11 @@ function show_log($ch, $st, $et, $image_display) {
             $user = htmlspecialchars($row->user, ENT_QUOTES);
             $content = htmlspecialchars($row->content, ENT_QUOTES);
             echo "   <div class='irc time'>{$row->created}</div>";
-            echo "   <div class='irc name'> ({$user})</div>";
+            if ($row->said == 1) {
+                echo "   <div class='irc name'> [{$user}]</div>";
+            } else {
+                echo "   <div class='irc name'> ({$user})</div>";
+            }
             if ($row->type == "PRIVMSG") {
                 echo "   <div class='irc priv'> {$content}</div><br />\n";
             } elseif ($row->type == "NOTICE") {

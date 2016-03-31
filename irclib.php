@@ -60,7 +60,6 @@ function insertChannel($ch) {
     $log = array(
         "name" => $ch,
     );
-    var_dump($log);
     $db = new DBRecord();
     return $db->insert('channel', $log, array('%s'));
 }
