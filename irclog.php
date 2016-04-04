@@ -123,21 +123,26 @@ function disp_list($selected_value) {
 function show_log($ch, $st, $et, $image_display) {
     $res = selectLogs($ch, $st, $et);
     foreach ($res as $row) {
-        if ($row->type == "IMGLINK" && $image_display=='1') {
-            echo "    <img src={$row->content} /><br />";
+        if ($row->type == "IMGLINK") {
+            if ($image_display == '1') {
+                echo "    <img src={$row->content} /><br />";
+            }
         } else {
             $user = htmlspecialchars($row->user, ENT_QUOTES);
             $content = htmlspecialchars($row->content, ENT_QUOTES);
+            $c = mb_ereg_replace("https?://[\w/:%#\$&\?\(\)~\.=\+\-]+", "<a href=\"\\0\" target=\"_blank\">\\0</a>", $content);
             echo "   <div class='irc time'>{$row->created}</div>";
             if ($row->said == 1) {
                 echo "   <div class='irc name'> [{$user}]</div>";
+            } elseif ($row->said === 0) {
+                echo "   <div class='irc name'> &lt;{$user}&gt;</div>";
             } else {
                 echo "   <div class='irc name'> ({$user})</div>";
             }
             if ($row->type == "PRIVMSG") {
-                echo "   <div class='irc priv'> {$content}</div><br />\n";
+                echo "   <div class='irc priv'> {$c}</div><br />\n";
             } elseif ($row->type == "NOTICE") {
-                echo "   <div class='irc noti'> {$content}</div><br />\n";
+                echo "   <div class='irc noti'> {$c}</div><br />\n";
             }
         }
     }

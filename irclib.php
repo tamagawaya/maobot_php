@@ -46,9 +46,9 @@ function selectChannels() {
     return $db->select('SELECT name FROM channel');
 }
 
-function selectImages($startnum, $endnum) {
+function selectImages($startnum, $num) {
     $db = new DBRecord();
-    return $db->select('SELECT * FROM images ORDER BY id DESC LIMIT ?, ?', array($startnum, $endnum), array('%d', '%d'));
+    return $db->select('SELECT * FROM images ORDER BY id DESC LIMIT ?, ?', array($startnum, $num), array('%d', '%d'));
 }
 
 function selectImagesCount() {

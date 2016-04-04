@@ -96,7 +96,7 @@ def main():
         #print(orig_url)
         #images = bsObj.find("div", {"class": "AdaptiveMedia-container      js-adaptive-media-container          "}).findAll("div", {"class": "AdaptiveMedia-photoContainer js-adaptive-photo "})
         #images = bsObj.find("div", {"class": re.compile("^(AdaptiveMedia-container)\s+(js-adaptive-media-container)\s*")}).findAll("div", {"class" : re.compile("^(AdaptiveMedia-photoContainer)\s+(js-adaptive-photo)\s*")})
-        images = bsObj.find("div", {"class": "AdaptiveMedia-container"}).findAll("div", {"class": "AdaptiveMedia-photoContainer"})
+        images = bsObj.find("div", {"class": "permalink-tweet-container"}).find("div", {"class": "AdaptiveMedia-container"}).findAll("div", {"class": "AdaptiveMedia-photoContainer"})
         for item in images:
             imageLoc = item.find("img")["src"]
             urlretrieve(imageLoc , dlDir + "twi" + imageLoc[28:])
